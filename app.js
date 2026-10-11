@@ -27,7 +27,7 @@
   }).filter(Boolean);
 
   // ---------- 保存データ ----------
-  const DEFAULT_STATE = { startAt: null, locked: false, chores: [], lastId: null, filter: 'all', warnedFor: null, titles: {} };
+  const DEFAULT_STATE = { startAt: null, locked: false, chores: [], lastId: null, filter: 'all', warnedFor: null, titles: {}, sleeping: false, resumeAfterSleep: false };
   let state = loadState();
   if (!state.titles || typeof state.titles !== 'object') state.titles = {};
   // title を書いていない動画は、一度再生したときに取得した名前を表示する
@@ -61,7 +61,9 @@
     pinModal: $('pinModal'), pinTitle: $('pinTitle'), pinDots: $('pinDots'), keypad: $('keypad'),
     parentMenu: $('parentMenu'), parentStatus: $('parentStatus'),
     resetBtn: $('resetBtn'), forceLockBtn: $('forceLockBtn'), closeMenuBtn: $('closeMenuBtn'),
-    toast: $('toast')
+    toast: $('toast'),
+    curtainImg: $('curtainImg'),
+    sleepBtn: $('sleepBtn'), sleepScreen: $('sleepScreen'), wakeBtn: $('wakeBtn')
   };
 
   if (C.appName) {
@@ -152,8 +154,25 @@
   let playRequested = false;
   let contentPlaying = false;
 
+  // 本編の再生が始まってから少しの間はカバーを残し、YouTube のタイトル表示が消えてから見せる
+  const REVEAL_DELAY_MS = 3500;
+  let revealed = false;
+  let revealTimer = null;
+
+  function hideReveal() {
+    revealed = false;
+    clearTimeout(revealTimer);
+  }
+
   function updateAdHole() {
-    el.shell.classList.toggle('is-ad', playRequested && !contentPlaying && !state.locked);
+    const isAd = playRequested && !contentPlaying && !state.locked && !state.sleeping;
+    el.shell.classList.toggle('is-ad', isAd);
+    // 一時停止中・読み込み前・再生開始直後は、YouTube のタイトルやボタン・関連動画をカバーで隠す
+    el.shell.classList.toggle('is-covered', !isAd && !(contentPlaying && revealed));
+  }
+
+  function setCurtain(id) {
+    if (id) el.curtainImg.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
   }
 
   function requestPlay() {
@@ -186,7 +205,12 @@
     if (e.data === S.PLAYING) {
       contentPlaying = true;
       playRequested = true;
+      if (state.sleeping) { player.pauseVideo(); el.sleepScreen.hidden = false; return; }
       if (state.locked) { player.pauseVideo(); showChores(); return; }
+      if (!revealed) {
+        clearTimeout(revealTimer);
+        revealTimer = setTimeout(() => { revealed = true; updateAdHole(); }, REVEAL_DELAY_MS);
+      }
       if (!state.startAt) {
         state.startAt = Date.now();   // 最初に再生した時点からカウント開始
         saveState();
@@ -198,16 +222,19 @@
       fillAutoTitle();
       captionsOffRepeatedly();
     } else if (e.data === S.ENDED) {
+      hideReveal();
       contentPlaying = false;
       playRequested = false;
       setPaused(true);
       el.endLayer.hidden = false;
     } else if (e.data === S.PAUSED || e.data === S.CUED) {
+      hideReveal();
       contentPlaying = false;
       playRequested = false;
       setPaused(true);
     } else {
       // 読み込み中・バッファ中（広告が入るのもこのタイミング）
+      hideReveal();
       contentPlaying = false;
     }
     updateAdHole();
@@ -264,8 +291,12 @@
     el.errorLayer.hidden = true;
     renderNowTitle();
     renderList();
+    setCurtain(id);
+    hideReveal();
+    updateAdHole();
     if (!ready) return;
     contentPlaying = false;
+    if (state.sleeping) { el.sleepScreen.hidden = false; player.cueVideoById(id); return; }
     if (autoplay && !state.locked) { requestPlay(); player.loadVideoById(id); }
     else { playRequested = false; player.cueVideoById(id); updateAdHole(); }
     if (state.locked && autoplay) showChores();
@@ -277,11 +308,13 @@
   }
 
   function togglePlay() {
+    if (state.sleeping) { el.sleepScreen.hidden = false; return; }
     if (state.locked) { showChores(); return; }
     if (!ready) return;
     const s = player.getPlayerState();
     if (s === YT.PlayerState.PLAYING || s === YT.PlayerState.BUFFERING) {
       playRequested = false;
+      hideReveal();
       player.pauseVideo();
       updateAdHole();
     } else {
@@ -363,6 +396,11 @@
 
   function renderTimer() {
     el.timer.classList.remove('is-warn', 'is-idle');
+    if (state.sleeping) {
+      el.timerFill.style.width = '0%';
+      el.timerText.textContent = 'おやすみ タイム';
+      return;
+    }
     if (state.locked) {
       el.timerFill.style.width = '0%';
       el.timerText.textContent = 'チャレンジ タイム';
@@ -381,7 +419,7 @@
   }
 
   function tick() {
-    if (!state.locked && state.startAt) {
+    if (!state.locked && !state.sleeping && state.startAt) {
       const left = remainingMs();
       if (left <= 0) { lock(); return; }
       if (WARN_MS && left <= WARN_MS && state.warnedFor !== state.startAt) {
@@ -481,6 +519,47 @@
   // カードごとに家族の確認を済ませているため、ここではそのまま解除する
   el.unlockBtn.addEventListener('click', unlock);
 
+  // ---------- ねるまえ（おやすみタイム） ----------
+  function goSleep() {
+    let wasPlaying = false;
+    if (ready) {
+      try { wasPlaying = player.getPlayerState() === YT.PlayerState.PLAYING; } catch (e) { /* noop */ }
+      try { player.pauseVideo(); } catch (e) { /* noop */ }
+    }
+    state.sleeping = true;
+    state.resumeAfterSleep = wasPlaying;
+    saveState();
+    playRequested = false;
+    hideReveal();
+    updateAdHole();
+    exitFullscreen();
+    el.sleepScreen.hidden = false;
+    renderTimer();
+  }
+
+  async function wakeUp() {
+    if (PIN) {
+      const ok = await askPin('おやすみ タイムの かいじょ');
+      if (!ok) return;
+    }
+    const resume = state.resumeAfterSleep;
+    state.sleeping = false;
+    state.resumeAfterSleep = false;
+    if (!state.locked) {
+      // 再開後は、次に再生した時点からまた60分
+      state.startAt = null;
+      state.warnedFor = null;
+    }
+    saveState();
+    el.sleepScreen.hidden = true;
+    renderTimer();
+    if (state.locked) { showChores(); return; }
+    if (resume && ready) { requestPlay(); player.playVideo(); }
+  }
+
+  el.sleepBtn.addEventListener('click', goSleep);
+  el.wakeBtn.addEventListener('click', wakeUp);
+
   // ---------- 暗証番号 ----------
   function askPin(title) {
     return new Promise(resolve => {
@@ -563,7 +642,9 @@
   renderFilters();
   renderList();
   renderNowTitle();
+  setCurtain(currentId);
   if (state.locked) showChores();
+  if (state.sleeping) el.sleepScreen.hidden = false;
   tick();
   setInterval(tick, 1000);
   setInterval(updateProgress, 500);
