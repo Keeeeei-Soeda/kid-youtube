@@ -83,6 +83,12 @@ window.KIDS_CONFIG = {
     { url: "https://www.youtube.com/watch?v=GC_mV1IpjWA", title: "Under the Sea (The Little Mermaid)", lang: "en" },
     { url: "https://www.youtube.com/watch?v=SXKlJuO07eM", title: "Part of Your World (The Little Mermaid)", lang: "en" },
     { url: "https://www.youtube.com/watch?v=7mputCb4vas", title: "リトル・マーメイド Part Of Your World （英語字幕付き）", lang: "en" },
-    { url: "https://www.youtube.com/watch?v=UXKe2QNdxYU", title: "アラジン A Whole New World 英語字幕付き", lang: "en" }
+    { url: "https://www.youtube.com/watch?v=UXKe2QNdxYU", title: "アラジン A Whole New World 英語字幕付き", lang: "en" },
+    { url: "https://www.youtube.com/watch?v=5dv6pOGeuGs", title: "Bibbidi-Bobbidi-Boo (Cinderella)", lang: "en" },
+    { url: "https://www.youtube.com/watch?v=curho_NPNTw", title: "BEEP! Police Baby Shark's Big Halloween Chase!", lang: "en" },
+    { url: "https://www.youtube.com/watch?v=LluMgMYZS0A", title: "FREEZE! Thief Shark Family is Caught", lang: "en" },
+    { url: "https://www.youtube.com/watch?v=Zh4cPYblv2E", title: "ラブール警部 恐竜がたまごを盗んだ！？", lang: "ja" },
+    { url: "https://www.youtube.com/watch?v=-_T62dpxvmE", title: "ラブール警部 ダンボールレストラン", lang: "ja" },
+    { url: "https://www.youtube.com/watch?v=iT-xcHh5Ngc", title: "【ママのお仕事は大変！】すみっこぐらしの家電リーメントで大忙し！", lang: "ja" }
   ]
 };
