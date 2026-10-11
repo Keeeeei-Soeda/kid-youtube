@@ -168,7 +168,10 @@ button:focus-visible, input:focus-visible {
   z-index: 2;
   display: grid;
   place-items: center;
-  /* 広告の「スキップ」ボタンが出る右下だけ穴を開け、直接押せるようにする */
+}
+
+/* 広告が流れている間だけ、「スキップ」ボタンが出る右下に穴を開けて直接押せるようにする */
+.shell.is-ad .tap-layer {
   --hole-w: min(260px, 34%);
   --hole-h: min(120px, 24%);
   clip-path: polygon(evenodd,

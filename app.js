@@ -148,6 +148,18 @@
   let player = null;
   let ready = false;
   let seeking = false;
+  // 広告判定：再生を指示したのに本編の再生（PLAYING）がまだ始まっていない間は広告中とみなす
+  let playRequested = false;
+  let contentPlaying = false;
+
+  function updateAdHole() {
+    el.shell.classList.toggle('is-ad', playRequested && !contentPlaying && !state.locked);
+  }
+
+  function requestPlay() {
+    playRequested = true;
+    updateAdHole();
+  }
 
   window.onYouTubeIframeAPIReady = () => {
     const vars = {
@@ -172,6 +184,8 @@
   function onStateChange(e) {
     const S = YT.PlayerState;
     if (e.data === S.PLAYING) {
+      contentPlaying = true;
+      playRequested = true;
       if (state.locked) { player.pauseVideo(); showChores(); return; }
       if (!state.startAt) {
         state.startAt = Date.now();   // 最初に再生した時点からカウント開始
@@ -182,13 +196,21 @@
       el.errorLayer.hidden = true;
       setPaused(false);
       fillAutoTitle();
-      captionsOff();
+      captionsOffRepeatedly();
     } else if (e.data === S.ENDED) {
+      contentPlaying = false;
+      playRequested = false;
       setPaused(true);
       el.endLayer.hidden = false;
     } else if (e.data === S.PAUSED || e.data === S.CUED) {
+      contentPlaying = false;
+      playRequested = false;
       setPaused(true);
+    } else {
+      // 読み込み中・バッファ中（広告が入るのもこのタイミング）
+      contentPlaying = false;
     }
+    updateAdHole();
   }
 
   // YouTube側の設定や動画の設定で字幕が自動で出ても、表示しないようにする
@@ -198,6 +220,14 @@
       try { player.unloadModule(m); } catch (e) { /* noop */ }
     });
     try { player.setOption('captions', 'track', {}); } catch (e) { /* noop */ }
+  }
+
+  // 字幕は読み込みが遅れて出てくることがあるため、再生開始後しばらく繰り返し消す
+  let captionTimers = [];
+  function captionsOffRepeatedly() {
+    captionTimers.forEach(clearTimeout);
+    captionsOff();
+    captionTimers = [500, 1500, 3000, 6000, 10000].map(ms => setTimeout(captionsOff, ms));
   }
 
   function fillAutoTitle() {
@@ -235,8 +265,9 @@
     renderNowTitle();
     renderList();
     if (!ready) return;
-    if (autoplay && !state.locked) player.loadVideoById(id);
-    else player.cueVideoById(id);
+    contentPlaying = false;
+    if (autoplay && !state.locked) { requestPlay(); player.loadVideoById(id); }
+    else { playRequested = false; player.cueVideoById(id); updateAdHole(); }
     if (state.locked && autoplay) showChores();
   }
 
@@ -249,8 +280,14 @@
     if (state.locked) { showChores(); return; }
     if (!ready) return;
     const s = player.getPlayerState();
-    if (s === YT.PlayerState.PLAYING || s === YT.PlayerState.BUFFERING) player.pauseVideo();
-    else player.playVideo();
+    if (s === YT.PlayerState.PLAYING || s === YT.PlayerState.BUFFERING) {
+      playRequested = false;
+      player.pauseVideo();
+      updateAdHole();
+    } else {
+      requestPlay();
+      player.playVideo();
+    }
   }
 
   function seekBy(sec) {
@@ -284,7 +321,7 @@
   el.replayBtn.addEventListener('click', () => {
     el.endLayer.hidden = true;
     if (state.locked) { showChores(); return; }
-    if (ready) { player.seekTo(0, true); player.playVideo(); }
+    if (ready) { requestPlay(); player.seekTo(0, true); player.playVideo(); }
   });
   el.nextBtn.addEventListener('click', () => {
     const list = filteredVideos().filter(v => !unavailable.has(v.id));
@@ -379,6 +416,8 @@
     state.chores = pickChores();
     saveState();
     if (ready) { try { player.pauseVideo(); } catch (e) { /* noop */ } }
+    playRequested = false;
+    updateAdHole();
     exitFullscreen();
     renderTimer();
     showChores();
