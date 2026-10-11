@@ -90,6 +90,13 @@ window.KIDS_CONFIG = {
     { url: "https://www.youtube.com/watch?v=R0wXSYsY14Q", title: "ラブール警部 警察官の休日", lang: "ja" },
     { url: "https://www.youtube.com/watch?v=_mCc5i0qjGQ", title: "Halloween Good Morning Song 🎃", lang: "en" },
     { url: "https://www.youtube.com/watch?v=Xl_jIMVXnNU", title: "Baby Shark 2 | 15 Min | Run Away with Bebefinn & Minjee", lang: "en" },
-    { url: "https://www.youtube.com/watch?v=CDWNdJBnv8Q", title: "Knock, Knock, Who's There?｜Don't Open the Door to Strangers!", lang: "en" }
+    { url: "https://www.youtube.com/watch?v=CDWNdJBnv8Q", title: "Knock, Knock, Who's There?｜Don't Open the Door to Strangers!", lang: "en" },
+    { url: "https://www.youtube.com/watch?v=1at7kKzBYxI", title: "Friend Like Me (Aladdin)", lang: "en" },
+    { url: "https://www.youtube.com/watch?v=bwbNYcTfghI", title: "Super Spooky Halloween with Baby Shark 🎃👻", lang: "en" },
+    { url: "https://www.youtube.com/watch?v=n8QLA-Y8zRs", title: "Save the Sea Animals with Baby Shark", lang: "en" },
+    { url: "https://www.youtube.com/watch?v=SCNXSMUwSWw", title: "Thief Shark Family Turns Baby Shark into a TINY Shark?!", lang: "en" },
+    { url: "https://www.youtube.com/watch?v=kRXmAIHYQR4", title: "When Will My Life Begin? (Tangled)", lang: "en" },
+    { url: "https://www.youtube.com/watch?v=zi5Z6rNU9Hw", title: "I've Got a Dream (Tangled)", lang: "en" },
+    { url: "https://www.youtube.com/watch?v=ILRs2r6lcHY", title: "I See the Light (Tangled)", lang: "en" }
   ]
 };
