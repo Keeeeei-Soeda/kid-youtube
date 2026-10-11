@@ -152,7 +152,7 @@
   window.onYouTubeIframeAPIReady = () => {
     const vars = {
       controls: 0, rel: 0, playsinline: 1, iv_load_policy: 3,
-      disablekb: 1, fs: 0, modestbranding: 1, cc_load_policy: 0
+      disablekb: 1, fs: 0, modestbranding: 1
     };
     if (location.protocol.startsWith('http')) vars.origin = location.origin;
     player = new YT.Player('player', {
@@ -160,9 +160,11 @@
       videoId: currentId || undefined,
       playerVars: vars,
       events: {
-        onReady: () => { ready = true; },
+        onReady: () => { ready = true; captionsOff(); },
         onStateChange: onStateChange,
-        onError: onPlayerError
+        onError: onPlayerError,
+        // 字幕モジュールが読み込まれたタイミングでも字幕を消す
+        onApiChange: captionsOff
       }
     });
   };
@@ -180,12 +182,22 @@
       el.errorLayer.hidden = true;
       setPaused(false);
       fillAutoTitle();
+      captionsOff();
     } else if (e.data === S.ENDED) {
       setPaused(true);
       el.endLayer.hidden = false;
     } else if (e.data === S.PAUSED || e.data === S.CUED) {
       setPaused(true);
     }
+  }
+
+  // YouTube側の設定や動画の設定で字幕が自動で出ても、表示しないようにする
+  function captionsOff() {
+    if (!player) return;
+    ['captions', 'cc'].forEach(m => {
+      try { player.unloadModule(m); } catch (e) { /* noop */ }
+    });
+    try { player.setOption('captions', 'track', {}); } catch (e) { /* noop */ }
   }
 
   function fillAutoTitle() {
