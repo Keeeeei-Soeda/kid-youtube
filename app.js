@@ -27,7 +27,7 @@
   }).filter(Boolean);
 
   // ---------- 保存データ ----------
-  const DEFAULT_STATE = { startAt: null, locked: false, chores: [], lastId: null, filter: 'all', warnedFor: null, titles: {}, sleeping: false, resumeAfterSleep: false };
+  const DEFAULT_STATE = { startAt: null, locked: false, chores: [], lastId: null, filter: 'all', warnedFor: null, titles: {} };
   let state = loadState();
   if (!state.titles || typeof state.titles !== 'object') state.titles = {};
   // title を書いていない動画は、一度再生したときに取得した名前を表示する
@@ -63,7 +63,7 @@
     resetBtn: $('resetBtn'), forceLockBtn: $('forceLockBtn'), closeMenuBtn: $('closeMenuBtn'),
     toast: $('toast'),
     curtainImg: $('curtainImg'),
-    sleepBtn: $('sleepBtn'), sleepScreen: $('sleepScreen'), wakeBtn: $('wakeBtn')
+    sleepBtn: $('sleepBtn')
   };
 
   if (C.appName) {
@@ -165,7 +165,7 @@
   }
 
   function updateAdHole() {
-    const isAd = playRequested && !contentPlaying && !state.locked && !state.sleeping;
+    const isAd = playRequested && !contentPlaying && !state.locked;
     el.shell.classList.toggle('is-ad', isAd);
     // 一時停止中・読み込み前・再生開始直後は、YouTube のタイトルやボタン・関連動画をカバーで隠す
     el.shell.classList.toggle('is-covered', !isAd && !(contentPlaying && revealed));
@@ -205,7 +205,6 @@
     if (e.data === S.PLAYING) {
       contentPlaying = true;
       playRequested = true;
-      if (state.sleeping) { player.pauseVideo(); el.sleepScreen.hidden = false; return; }
       if (state.locked) { player.pauseVideo(); showChores(); return; }
       if (!revealed) {
         clearTimeout(revealTimer);
@@ -296,7 +295,6 @@
     updateAdHole();
     if (!ready) return;
     contentPlaying = false;
-    if (state.sleeping) { el.sleepScreen.hidden = false; player.cueVideoById(id); return; }
     if (autoplay && !state.locked) { requestPlay(); player.loadVideoById(id); }
     else { playRequested = false; player.cueVideoById(id); updateAdHole(); }
     if (state.locked && autoplay) showChores();
@@ -308,7 +306,6 @@
   }
 
   function togglePlay() {
-    if (state.sleeping) { el.sleepScreen.hidden = false; return; }
     if (state.locked) { showChores(); return; }
     if (!ready) return;
     const s = player.getPlayerState();
@@ -396,11 +393,6 @@
 
   function renderTimer() {
     el.timer.classList.remove('is-warn', 'is-idle');
-    if (state.sleeping) {
-      el.timerFill.style.width = '0%';
-      el.timerText.textContent = 'おやすみ タイム';
-      return;
-    }
     if (state.locked) {
       el.timerFill.style.width = '0%';
       el.timerText.textContent = 'チャレンジ タイム';
@@ -419,7 +411,7 @@
   }
 
   function tick() {
-    if (!state.locked && !state.sleeping && state.startAt) {
+    if (!state.locked && state.startAt) {
       const left = remainingMs();
       if (left <= 0) { lock(); return; }
       if (WARN_MS && left <= WARN_MS && state.warnedFor !== state.startAt) {
@@ -519,46 +511,16 @@
   // カードごとに家族の確認を済ませているため、ここではそのまま解除する
   el.unlockBtn.addEventListener('click', unlock);
 
-  // ---------- ねるまえ（おやすみタイム） ----------
-  function goSleep() {
-    let wasPlaying = false;
-    if (ready) {
-      try { wasPlaying = player.getPlayerState() === YT.PlayerState.PLAYING; } catch (e) { /* noop */ }
-      try { player.pauseVideo(); } catch (e) { /* noop */ }
-    }
-    state.sleeping = true;
-    state.resumeAfterSleep = wasPlaying;
-    saveState();
-    playRequested = false;
-    hideReveal();
-    updateAdHole();
-    exitFullscreen();
-    el.sleepScreen.hidden = false;
-    renderTimer();
-  }
-
-  async function wakeUp() {
+  // ---------- ねるまえ（チャレンジなしで再開） ----------
+  // 寝る前などお手伝いが難しいときに、家族のパスワードでチャレンジを飛ばして再開する
+  el.sleepBtn.addEventListener('click', async () => {
     if (PIN) {
-      const ok = await askPin('おやすみ タイムの かいじょ');
+      const ok = await askPin('ねるまえ：チャレンジなしで さいかい');
       if (!ok) return;
     }
-    const resume = state.resumeAfterSleep;
-    state.sleeping = false;
-    state.resumeAfterSleep = false;
-    if (!state.locked) {
-      // 再開後は、次に再生した時点からまた60分
-      state.startAt = null;
-      state.warnedFor = null;
-    }
-    saveState();
-    el.sleepScreen.hidden = true;
-    renderTimer();
-    if (state.locked) { showChores(); return; }
-    if (resume && ready) { requestPlay(); player.playVideo(); }
-  }
-
-  el.sleepBtn.addEventListener('click', goSleep);
-  el.wakeBtn.addEventListener('click', wakeUp);
+    unlock();
+    if (ready) { requestPlay(); player.playVideo(); }
+  });
 
   // ---------- 暗証番号 ----------
   function askPin(title) {
@@ -644,7 +606,6 @@
   renderNowTitle();
   setCurtain(currentId);
   if (state.locked) showChores();
-  if (state.sleeping) el.sleepScreen.hidden = false;
   tick();
   setInterval(tick, 1000);
   setInterval(updateProgress, 500);

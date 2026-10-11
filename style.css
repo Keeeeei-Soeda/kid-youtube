@@ -339,9 +339,12 @@ button:focus-visible, input:focus-visible {
   overflow: hidden;
 }
 
-/* ---------- ねるまえボタン・おやすみタイム ---------- */
+/* ---------- ねるまえボタン（チャレンジタイムの右上） ---------- */
 .sleep-btn {
-  flex: none;
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  z-index: 1;
   min-height: 48px;
   padding: 0 20px;
   border-radius: 999px;
@@ -353,23 +356,6 @@ button:focus-visible, input:focus-visible {
 }
 
 .sleep-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #17143A; }
-
-.sleep {
-  position: fixed;
-  inset: 0;
-  z-index: 55;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  background: radial-gradient(circle at 50% 30%, #3A3570 0%, #1E1B3F 70%);
-  color: #fff;
-  text-align: center;
-}
-
-.sleep-inner { display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.sleep-moon { font-size: 96px; line-height: 1; }
-.sleep-title { margin: 0; font-size: clamp(34px, 5vw, 52px); font-weight: 800; letter-spacing: .04em; }
-.sleep-lead { margin: 0 0 18px; font-size: 20px; font-weight: 700; opacity: .9; word-break: keep-all; }
 
 /* ---------- 動画リスト ---------- */
 .side {
@@ -756,7 +742,7 @@ button:focus-visible, input:focus-visible {
 
 @media (max-width: 560px) {
   .top { flex-wrap: wrap; }
-  .timer { min-width: 0; width: 100%; order: 3; }
+  .timer { min-width: 0; width: 100%; }
   .time { display: none; }
   .ctrl { width: 44px; height: 44px; }
   .item { grid-template-columns: 130px minmax(0, 1fr); }

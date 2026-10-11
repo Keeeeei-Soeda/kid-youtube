@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=202610112041">
+  <link rel="stylesheet" href="style.css?v=202610112045">
 </head>
 <body>
   <div class="app">
@@ -27,8 +27,6 @@
         <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
         <span class="timer-text" id="timerText"></span>
       </div>
-
-      <button class="sleep-btn" id="sleepBtn"><span aria-hidden="true">🌙</span> ねるまえ</button>
     </header>
 
     <main class="body">
@@ -86,6 +84,7 @@
 
   <!-- チャレンジタイム -->
   <section class="chores" id="choreScreen" hidden>
+    <button class="sleep-btn" id="sleepBtn"><span aria-hidden="true">🌙</span> ねるまえ</button>
     <div class="chores-inner">
       <h2 class="chores-title">チャレンジ タイム！</h2>
       <p class="chores-lead">おわったら、おうちの ひとに「かくにん」を おしてもらってね</p>
@@ -95,16 +94,6 @@
         <p class="finish-text">ぜんぶ できたね！</p>
         <button class="big-btn" id="unlockBtn">どうがを みる</button>
       </div>
-    </div>
-  </section>
-
-  <!-- おやすみタイム -->
-  <section class="sleep" id="sleepScreen" hidden>
-    <div class="sleep-inner">
-      <div class="sleep-moon" aria-hidden="true">🌙</div>
-      <h2 class="sleep-title">おやすみ タイム</h2>
-      <p class="sleep-lead">きょうの どうがは おしまい。また あした みようね</p>
-      <button class="big-btn" id="wakeBtn">おうちの人の かいじょ</button>
     </div>
   </section>
 
@@ -132,8 +121,8 @@
 
   <div class="toast" id="toast" hidden></div>
 
-  <script src="videos.js?v=202610112041"></script>
-  <script src="app.js?v=202610112041"></script>
+  <script src="videos.js?v=202610112045"></script>
+  <script src="app.js?v=202610112045"></script>
   <script src="https://www.youtube.com/iframe_api" async></script>
 </body>
 </html>
