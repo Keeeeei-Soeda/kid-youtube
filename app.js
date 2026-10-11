@@ -23,12 +23,15 @@
     const id = parseId(v);
     if (!id) return null;
     const lang = v.lang === 'ja' || v.lang === 'en' ? v.lang : 'other';
-    return { id, title: v.title || `どうが ${i + 1}`, lang };
+    return { id, title: v.title || `どうが ${i + 1}`, lang, auto: !v.title };
   }).filter(Boolean);
 
   // ---------- 保存データ ----------
-  const DEFAULT_STATE = { startAt: null, locked: false, chores: [], lastId: null, filter: 'all', warnedFor: null };
+  const DEFAULT_STATE = { startAt: null, locked: false, chores: [], lastId: null, filter: 'all', warnedFor: null, titles: {} };
   let state = loadState();
+  if (!state.titles || typeof state.titles !== 'object') state.titles = {};
+  // title を書いていない動画は、一度再生したときに取得した名前を表示する
+  VIDEOS.forEach(v => { if (v.auto && state.titles[v.id]) v.title = state.titles[v.id]; });
 
   function loadState() {
     try {
@@ -176,12 +179,26 @@
       el.endLayer.hidden = true;
       el.errorLayer.hidden = true;
       setPaused(false);
+      fillAutoTitle();
     } else if (e.data === S.ENDED) {
       setPaused(true);
       el.endLayer.hidden = false;
     } else if (e.data === S.PAUSED || e.data === S.CUED) {
       setPaused(true);
     }
+  }
+
+  function fillAutoTitle() {
+    const v = videoById(currentId);
+    if (!v || !v.auto || state.titles[v.id]) return;
+    let t = '';
+    try { t = (player.getVideoData() || {}).title || ''; } catch (e) { /* noop */ }
+    if (!t) return;
+    v.title = t;
+    state.titles[v.id] = t;
+    saveState();
+    renderNowTitle();
+    renderList();
   }
 
   function onPlayerError() {

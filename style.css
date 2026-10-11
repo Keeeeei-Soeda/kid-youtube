@@ -320,13 +320,15 @@ button:focus-visible, input:focus-visible {
 
 .filters {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   padding: 14px 14px 10px;
-  flex-wrap: wrap;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .chip {
-  padding: 8px 16px;
+  flex: none;
+  padding: 8px 13px;
   border-radius: 999px;
   background: #FDEAF2;
   font-size: 15px;
