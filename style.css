@@ -168,6 +168,16 @@ button:focus-visible, input:focus-visible {
   z-index: 2;
   display: grid;
   place-items: center;
+  /* 広告の「スキップ」ボタンが出る右下だけ穴を開け、直接押せるようにする */
+  --hole-w: min(260px, 34%);
+  --hole-h: min(120px, 24%);
+  clip-path: polygon(evenodd,
+    0 0, 100% 0, 100% 100%, 0 100%, 0 0,
+    calc(100% - var(--hole-w)) calc(100% - var(--hole-h)),
+    100% calc(100% - var(--hole-h)),
+    100% 100%,
+    calc(100% - var(--hole-w)) 100%,
+    calc(100% - var(--hole-w)) calc(100% - var(--hole-h)));
 }
 
 .big-play {
