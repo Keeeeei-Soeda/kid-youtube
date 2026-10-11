@@ -89,6 +89,12 @@ window.KIDS_CONFIG = {
     { url: "https://www.youtube.com/watch?v=LluMgMYZS0A", title: "FREEZE! Thief Shark Family is Caught", lang: "en" },
     { url: "https://www.youtube.com/watch?v=Zh4cPYblv2E", title: "ラブール警部 恐竜がたまごを盗んだ！？", lang: "ja" },
     { url: "https://www.youtube.com/watch?v=-_T62dpxvmE", title: "ラブール警部 ダンボールレストラン", lang: "ja" },
-    { url: "https://www.youtube.com/watch?v=iT-xcHh5Ngc", title: "【ママのお仕事は大変！】すみっこぐらしの家電リーメントで大忙し！", lang: "ja" }
+    { url: "https://www.youtube.com/watch?v=iT-xcHh5Ngc", title: "【ママのお仕事は大変！】すみっこぐらしの家電リーメントで大忙し！", lang: "ja" },
+    { url: "https://www.youtube.com/watch?v=tHljMUKWZ9c", title: "アンパンマンのおもちゃの自動販売機で遊ぶよ！", lang: "ja" },
+    { url: "https://www.youtube.com/watch?v=GAqHC7EbnNA", title: "くみくみキューブ パズル ブロック組み立て アニメキッズ", lang: "ja" },
+    { url: "https://www.youtube.com/watch?v=R0wXSYsY14Q", title: "ラブール警部 警察官の休日", lang: "ja" },
+    { url: "https://www.youtube.com/watch?v=_mCc5i0qjGQ", title: "Halloween Good Morning Song 🎃", lang: "en" },
+    { url: "https://www.youtube.com/watch?v=Xl_jIMVXnNU", title: "Baby Shark 2 | 15 Min | Run Away with Bebefinn & Minjee", lang: "en" },
+    { url: "https://www.youtube.com/watch?v=CDWNdJBnv8Q", title: "Knock, Knock, Who's There?｜Don't Open the Door to Strangers!", lang: "en" }
   ]
 };
