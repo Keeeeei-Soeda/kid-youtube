@@ -299,7 +299,7 @@
     el.timer.classList.remove('is-warn', 'is-idle');
     if (state.locked) {
       el.timerFill.style.width = '0%';
-      el.timerText.textContent = 'おてつだい タイム';
+      el.timerText.textContent = 'チャレンジ タイム';
       return;
     }
     if (!state.startAt) {
@@ -321,7 +321,7 @@
       if (WARN_MS && left <= WARN_MS && state.warnedFor !== state.startAt) {
         state.warnedFor = state.startAt;
         saveState();
-        showToast(`あと ${Math.ceil(left / 60000)}分で おてつだい タイムだよ`);
+        showToast(`あと ${Math.ceil(left / 60000)}分で チャレンジ タイムだよ`);
       }
     }
     renderTimer();
@@ -335,7 +335,7 @@
     toastTimer = setTimeout(() => { el.toast.hidden = true; }, 6000);
   }
 
-  // ---------- お手伝いタイム ----------
+  // ---------- チャレンジタイム ----------
   function pickChores() {
     const pool = CHORES.slice();
     for (let i = pool.length - 1; i > 0; i--) {
@@ -476,7 +476,7 @@
       if (!ok) return;
     }
     let status;
-    if (state.locked) status = 'いまは お手伝いタイム中です。';
+    if (state.locked) status = 'いまは チャレンジタイム中です。';
     else if (!state.startAt) status = `まだカウントは始まっていません。\n再生ボタンを押した時点から${LIMIT_MIN}分です。`;
     else {
       const start = new Date(state.startAt);
